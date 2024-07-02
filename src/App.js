@@ -1,23 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTasks } from './store/tasksSlice';
 
 function App() {
+  const dispatch = useDispatch();
+  const tasks = useSelector((state) => state.tasks.items);
+  const taskStatus = useSelector((state) => state.tasks.status);
+  const error = useSelector((state) => state.tasks.error);
+
+  useEffect(() => {
+    if (taskStatus === 'idle') {
+      dispatch(fetchTasks());
+    }
+  }, [taskStatus, dispatch]);
+
+  let content;
+
+  if (taskStatus === 'loading') {
+    content = <div>Loading...</div>;
+  } else if (taskStatus === 'succeeded') {
+    content = (
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id}>{task.title}</li>
+        ))}
+      </ul>
+    );
+  } else if (taskStatus === 'failed') {
+    content = <div>{error}</div>;
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Task List</h1>
+      {content}
     </div>
   );
 }
